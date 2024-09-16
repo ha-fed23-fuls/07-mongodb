@@ -7,7 +7,7 @@ CONNECTION_STRING=kopierad från Compass
 const test: string | undefined = process.env.TEST
 console.log('Test env-fil: ' + test)
 
-import { MongoClient, Db, Collection, ObjectId, WithId, FindCursor, InsertOneResult } from 'mongodb'
+import { MongoClient, Db, Collection, ObjectId, WithId, FindCursor, InsertOneResult, DeleteResult } from 'mongodb'
 import { Animal } from './models/animal.js'
 
 async function connect() {
@@ -28,6 +28,8 @@ async function connect() {
 		const rabbit: Animal = { species: 'Rabbit', factoid: 'Rabbits are extremely cute', score: 25 }
 		// Kom ihåg att validera animal-objektet om det kommer från frontend
 		await insertRabbit(col, rabbit)
+
+		await deleteRabbit(col)
 
 		await client.close()
 	} catch(error: any) {
@@ -73,6 +75,20 @@ async function insertRabbit(col: Collection<Animal>, rabbit: Animal): Promise<Ob
 		return null
 	}
 	return result.insertedId
+}
+
+async function deleteRabbit(col: Collection<Animal>): Promise<void> {
+	// const filter = { _id: new ObjectId('66e81a98501ff2c390342a7e')  }
+	const filter = { species: 'Rabbit' }
+	const result: DeleteResult = await col.deleteOne(filter)
+	if( !result.acknowledged ) {
+		console.log('Could not delete any rabbits')
+		return
+	}
+	// deletedCount är 0 eller 1
+	console.log(`Deleted ${result.deletedCount} rabbit(s).`)
+
+	// deleteMany(filter) - tar bort ALLA matchande dokument
 }
 
 
