@@ -7,7 +7,7 @@ CONNECTION_STRING=kopierad från Compass
 const test: string | undefined = process.env.TEST
 console.log('Test env-fil: ' + test)
 
-import { MongoClient, Db, Collection, ObjectId, WithId } from 'mongodb'
+import { MongoClient, Db, Collection, ObjectId, WithId, FindCursor } from 'mongodb'
 import { Animal } from './models/animal.js'
 
 async function connect() {
@@ -22,7 +22,8 @@ async function connect() {
 		const db: Db = await client.db('exercises')
 		const col: Collection<Animal> = db.collection<Animal>('animalFacts')
 
-		findTheElephant(col)
+		await findTheElephant(col)
+		await findHighestScores(col)
 
 		await client.close()
 	} catch(error: any) {
@@ -41,6 +42,22 @@ async function findTheElephant(col: Collection<Animal>): Promise<void> {
 	} else {
 		console.log('All animals were in hiding...')
 	}
+}
+
+async function findHighestScores(col: Collection<Animal>): Promise<void> {
+	// Välj alla djur som har minst 75 i score
+	// score >= 75
+	const filter = { score: { $gte: 75 } }
+	const cursor: FindCursor<WithId<Animal>> = col.find(filter)
+	const found: WithId<Animal>[] = await cursor.toArray()
+
+	if( found.length < 1 ) {
+		console.log('No animals with high enough score :(')
+		return
+	}
+	found.forEach(animal => {
+		console.log(`${animal.species} has a score of ${animal.score}.`)
+	})
 }
 
 
