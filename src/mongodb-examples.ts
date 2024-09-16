@@ -7,7 +7,7 @@ CONNECTION_STRING=kopierad från Compass
 const test: string | undefined = process.env.TEST
 console.log('Test env-fil: ' + test)
 
-import { MongoClient, Db, Collection, ObjectId, WithId, FindCursor } from 'mongodb'
+import { MongoClient, Db, Collection, ObjectId, WithId, FindCursor, InsertOneResult } from 'mongodb'
 import { Animal } from './models/animal.js'
 
 async function connect() {
@@ -24,6 +24,10 @@ async function connect() {
 
 		await findTheElephant(col)
 		await findHighestScores(col)
+
+		const rabbit: Animal = { species: 'Rabbit', factoid: 'Rabbits are extremely cute', score: 25 }
+		// Kom ihåg att validera animal-objektet om det kommer från frontend
+		await insertRabbit(col, rabbit)
 
 		await client.close()
 	} catch(error: any) {
@@ -60,6 +64,16 @@ async function findHighestScores(col: Collection<Animal>): Promise<void> {
 	})
 }
 
+async function insertRabbit(col: Collection<Animal>, rabbit: Animal): Promise<ObjectId | null> {
+	const result: InsertOneResult<Animal> = await col.insertOne(rabbit)
+	// acknowledged: boolean  <- true om queryn körs
+	// insertedId: ObjectId  <- det id som objektet tilldelas
+	if( !result.acknowledged ) {
+		console.log('Could not insert rabbit :(')
+		return null
+	}
+	return result.insertedId
+}
 
 
 connect()
