@@ -1,0 +1,19 @@
+{
+  "name": "07-mongodb",
+  "version": "1.0.0",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "David Andersson",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "mongodb": "^6.9.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.6.2"
+  }
+}
