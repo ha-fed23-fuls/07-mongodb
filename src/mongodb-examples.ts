@@ -7,7 +7,7 @@ CONNECTION_STRING=kopierad från Compass
 const test: string | undefined = process.env.TEST
 console.log('Test env-fil: ' + test)
 
-import { MongoClient, Db, Collection, ObjectId, WithId, FindCursor, InsertOneResult, DeleteResult } from 'mongodb'
+import { MongoClient, Db, Collection, ObjectId, WithId, FindCursor, InsertOneResult, DeleteResult, UpdateResult } from 'mongodb'
 import { Animal } from './models/animal.js'
 
 async function connect() {
@@ -30,6 +30,8 @@ async function connect() {
 		await insertRabbit(col, rabbit)
 
 		await deleteRabbit(col)
+
+		await updateRabbit(col)
 
 		await client.close()
 	} catch(error: any) {
@@ -89,6 +91,23 @@ async function deleteRabbit(col: Collection<Animal>): Promise<void> {
 	console.log(`Deleted ${result.deletedCount} rabbit(s).`)
 
 	// deleteMany(filter) - tar bort ALLA matchande dokument
+}
+
+async function updateRabbit(col: Collection<Animal>): Promise<void> {
+	// Vanligt filter för att välja ut ett dokument, uppdateringsfilter för att beskriva den ändring som ska göras
+	const filter = { species: 'Rabbit' }
+	const updateFilter = {
+		$set: {
+			species: 'Easter bunny',
+			score: 58
+		}
+	}
+	const result: UpdateResult<Animal> = await col.updateOne(filter, updateFilter)
+	if( !result.acknowledged ) {
+		console.log('Could not update the rabbits.')
+		return
+	}
+	console.log(`Matched ${result.matchedCount} documents and modified ${result.modifiedCount}.`)
 }
 
 
